@@ -1,0 +1,166 @@
+
+#######################################
+# chimera: 
+
+chimera-chat-7b:
+    config_dir: "models/chimera-chat-7b"
+    model_id: 'chimera-chat-7b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config: # pass any huggingface generation configs here
+        # https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig
+        # max_length: 20          # huggingface default
+        max_new_tokens: 512     # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L117
+        min_length: 20          # huggingface default
+        min_new_tokens: 0       # self-defined
+        early_stopping: False   # huggingface default
+        do_sample: True         # huggingface default
+        temperature: 0.7        # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L116
+        top_k: 50               # huggingface default
+        top_p: 1.0              # huggingface default
+        repetition_penalty: 1.0 # huggingface default
+        no_repeat_ngram_size: 0 # huggingface default
+    
+    batch_size: 10
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+
+
+chimera-inst-chat-7b:
+    config_dir: "models/chimera-inst-chat-7b"
+    model_id: 'chimera-inst-chat-7b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config: # pass any huggingface generation configs here
+        # https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig
+        # max_length: 20          # huggingface default
+        max_new_tokens: 512     # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L117
+        min_length: 20          # huggingface default
+        min_new_tokens: 0       # self-defined
+        early_stopping: False   # huggingface default
+        do_sample: True         # huggingface default
+        temperature: 0.7        # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L116
+        top_k: 50               # huggingface default
+        top_p: 1.0              # huggingface default
+        repetition_penalty: 1.0 # huggingface default
+        no_repeat_ngram_size: 0 # huggingface default
+    
+    batch_size: 10
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+
+
+chimera-chat-13b:
+    config_dir: "models/chimera-chat-13b"
+    model_id: 'chimera-chat-13b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config: # pass any huggingface generation configs here
+        # https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig
+        # max_length: 20          # huggingface default
+        max_new_tokens: 512     # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L117
+        min_length: 20          # huggingface default
+        min_new_tokens: 0       # self-defined
+        early_stopping: False   # huggingface default
+        do_sample: True         # huggingface default
+        temperature: 0.7        # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L116
+        top_k: 50               # huggingface default
+        top_p: 1.0              # huggingface default
+        repetition_penalty: 1.0 # huggingface default
+        no_repeat_ngram_size: 0 # huggingface default
+    
+    batch_size: 5
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+
+chimera-inst-chat-13b:
+    config_dir: "models/chimera-inst-chat-13b"
+    model_id: 'chimera-inst-chat-13b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config: # pass any huggingface generation configs here
+        # https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig
+        # max_length: 20          # huggingface default
+        max_new_tokens: 512     # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L117
+        min_length: 20          # huggingface default
+        min_new_tokens: 0       # self-defined
+        early_stopping: False   # huggingface default
+        do_sample: True         # huggingface default
+        temperature: 0.7        # https://github.com/lm-sys/FastChat/blob/50a69c624f3191a31699c29148d1783a6d7034c0/fastchat/serve/cli.py#L116
+        top_k: 50               # huggingface default
+        top_p: 1.0              # huggingface default
+        repetition_penalty: 1.0 # huggingface default
+        no_repeat_ngram_size: 0 # huggingface default
+    
+    batch_size: 5
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+#######################################
+
+
+#######################################
+# phoenix: 
+phoenix-chat-7b:
+    config_dir: FreedomIntelligence/phoenix-chat-7b
+    model_id: 'phoenix-chat-7b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config:
+        # max_length: 2048          
+        max_new_tokens: 512     
+        min_length: 20          
+        min_new_tokens: 0       
+        early_stopping: False   
+        do_sample: True         
+        temperature: 0.7        
+        top_k: 50               
+        top_p: 1.0              
+        repetition_penalty: 1.0 
+        no_repeat_ngram_size: 0 
+    
+    batch_size: 10
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+
+
+phoenix-inst-chat-7b:
+    config_dir: FreedomIntelligence/phoenix-inst-chat-7b
+    model_id: 'phoenix-inst-chat-7b'
+    prompt: "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\nHuman: <s> Please translate the following sentence into Chinese: {question}</s>Assistant: <s>"
+    generation_config:
+        # max_length: 2048          
+        max_new_tokens: 512     
+        min_length: 20          
+        min_new_tokens: 0       
+        early_stopping: False   
+        do_sample: True         
+        temperature: 0.7        
+        top_k: 50               
+        top_p: 1.0              
+        repetition_penalty: 1.0 
+        no_repeat_ngram_size: 0 
+    
+    batch_size: 10
+    device: 'cuda'          # ['cuda', 'cpu', 'mps']
+    n_gpus: 1               # int>0, or 'auto'
+    precision: 'fp16'
+    answer_id: 'auto'
+    input_pth: 'data/val.jsonl'
+    output_dir_or_file: 'output/llm'
+#######################################
+

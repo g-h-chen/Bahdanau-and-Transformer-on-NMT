@@ -1,0 +1,48 @@
+data:
+  train_length: 1000000
+  val_length: 1000000
+  train_batch_size: 80
+  val_batch_size: 80
+
+trainer:
+  gpus: 3
+  precision: 16
+  # max_steps: 140000
+  max_epochs: 11
+  num_nodes: 1 
+  enable_progress_bar: False
+  log_every_n_steps: 200
+
+logger: ### double check before start!!
+  save_dir: 'logs'
+  name: 'depth'
+  version: 4
+
+seq2seqtransformer:
+  num_encoder_layers: 15
+  num_decoder_layers: 15
+  maxlen: 256
+  emb_size: 768 
+  n_head: 8
+  learning_rate: 3.e-3
+  dropout: .1
+  weight_decay: 0.
+  src_tokenizer_name: 'bert-base-uncased' 
+  tgt_tokenizer_name: 'bert-base-chinese'
+  do_not_override: False # make it True to use the original multiheadattention module provided by pytorch
+
+
+optimizer:
+  # lr: 1.e-3
+  general:
+    weight_decay: 0.
+    betas: [0.9, 0.98]
+    eps: 1.0e-9
+
+
+scheduler:
+  warmup_steps: 6000
+  verbose: False
+  monitor: "val/loss"
+  frequency: 1
+  interval: step

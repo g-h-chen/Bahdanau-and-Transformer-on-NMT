@@ -1,0 +1,63 @@
+data:
+  train_length: 100000
+  val_length: 300000
+  train_batch_size: 100
+  val_batch_size: 100
+
+trainer:
+  gpus: 1
+  precision: 16
+  # max_steps: 140000
+  max_epochs: 20
+  log_every_n_steps: 10
+  # val_check_interval: 2000 # val every s steps
+  limit_val_batches: 100 # should be changed accordingly if val bs changes
+  num_nodes: 1 
+  enable_progress_bar: False
+  gradient_clip_val: 0.5
+
+ModelCheckpoint:
+  monitor: "val/loss"
+  auto_insert_metric_name: False
+  # every_n_epochs: 1
+  every_n_train_steps: 200
+  save_weights_only: False
+  save_last: True
+  save_top_k: 1
+  filename: "epoch{epoch:02d}-val_loss{val/loss:.2f}"
+
+logger: ### double check before start!!
+  save_dir: 'logs'
+  name: 'dim'
+  # version: 0
+
+EncoderDecoder:
+  hidden_size: 256 
+  num_encoder_layers: 1
+  num_decoder_layers: 1
+  bidirectional: False
+  maxlen: 128
+  dropout: .2
+  # pretrained_src_emb: 'output/depth/version_8/epoch10-val_loss2.21.ckpt'
+  # pretrained_tgt_emb: 'output/depth/version_8/epoch10-val_loss2.21.ckpt'
+  src_tokenizer_name: 'bert-base-uncased' 
+  tgt_tokenizer_name: 'bert-base-chinese'
+
+tf:
+  code: 0
+  message: None
+
+optimizer:
+  general:
+    lr: 5.e-4
+    weight_decay: 1.e-2
+    # betas: [0.9, 0.999]
+
+
+# scheduler:
+#   warmup_steps: 2000
+#   verbose: False
+#   peak_lr: 5.e-04
+#   monitor: "val/loss"
+#   frequency: 1
+#   interval: step
