@@ -1,0 +1,16 @@
+trainer:
+  gpus: 3
+  precision: 16
+  max_epochs: 100
+  num_nodes: 1
+seq2seqtransformer:
+  num_encoder_layers: 10
+  num_decoder_layers: 10
+  maxlen: 256
+  emb_size: 768
+  n_head: 8
+  learning_rate: 0.001
+  dropout: 0.1
+  weight_decay: 0.0
+  src_tokenizer_name: bert-base-uncased
+  tgt_tokenizer_name: bert-base-chinese

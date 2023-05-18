@@ -1,0 +1,42 @@
+data:
+  train_length: 100000
+  val_length: 39323
+  train_batch_size: 100
+  val_batch_size: 100
+trainer:
+  gpus: 1
+  precision: 16
+  max_epochs: 20
+  log_every_n_steps: 10
+  limit_val_batches: 100
+  num_nodes: 1
+  enable_progress_bar: false
+  gradient_clip_val: 0.5
+ModelCheckpoint:
+  monitor: val/loss
+  auto_insert_metric_name: false
+  every_n_train_steps: 200
+  save_weights_only: false
+  save_last: false
+  save_top_k: 1
+  filename: epoch{epoch:02d}-val_loss{val/loss:.2f}
+logger:
+  save_dir: logs
+  name: improvement
+  version: version_0
+EncoderDecoder:
+  hidden_size: 256
+  num_encoder_layers: 1
+  num_decoder_layers: 1
+  bidirectional: false
+  maxlen: 128
+  dropout: 0.2
+  src_tokenizer_name: bert-base-uncased
+  tgt_tokenizer_name: bert-base-chinese
+optimizer:
+  general:
+    lr: 0.0005
+    weight_decay: 0.01
+tf: 
+  code: 0
+  message: constant at 1

@@ -1,0 +1,39 @@
+data:
+  train_length: 200000
+  val_length: 39323
+  train_batch_size: 20
+  val_batch_size: 20
+trainer:
+  gpus: 1
+  precision: 16
+  max_epochs: 5
+  log_every_n_steps: 5
+  val_check_interval: 2000
+  save_every_n_train_steps: 20
+  limit_val_batches: 50
+  num_nodes: 1
+  enable_progress_bar: false
+  gradient_clip_val: 0.5
+logger:
+  save_dir: logs
+  name: beta
+  version: version_penalized
+EncoderDecoder:
+  maxlen: 256
+  hidden_size: 256
+  num_encoder_layers: 1
+  num_decoder_layers: 1
+  bidirectional: false
+  dropout: 0.2
+  weight_decay: 0.001
+  use_decoder_attention: true
+  src_tokenizer_name: bert-base-uncased
+  tgt_tokenizer_name: bert-base-chinese
+  teacher_or_self: true
+optimizer:
+  general:
+    lr: 0.001
+    betas:
+    - 0.9
+    - 0.999
+tf: start at 0.5, linearly decay to 0.1 in 1500 steps
