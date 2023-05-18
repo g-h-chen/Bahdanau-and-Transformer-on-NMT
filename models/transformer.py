@@ -11,7 +11,7 @@ Two bugs are fixed:
                 else:
                     t = torch.clamp(t, max=clamp_value, min=-clamp_value) # only clamp the positive infs
             return t
-        See /mntnfs/med_data5/guimingchen/anaconda3/envs/cgm/lib/python3.9/site-packages/torch/nn/functional.py, line ~4886.
+        See ~/anaconda3/envs/cgm/lib/python3.9/site-packages/torch/nn/functional.py, line ~4886.
 '''
 
 from typing import Any
