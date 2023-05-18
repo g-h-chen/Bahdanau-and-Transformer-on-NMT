@@ -21,7 +21,7 @@ do
             # exit 1
             continue
         else # make txt file
-            python make_pred_txt.py $experiment_name $version
+            python utils/make_pred_txt.py $experiment_name $version
         fi
     fi
 
@@ -54,7 +54,7 @@ do
             # exit 1
             continue
         else # make txt file
-            python make_pred_txt.py $experiment_name $version
+            python utils/make_pred_txt.py $experiment_name $version
         fi
     fi
 
@@ -88,7 +88,7 @@ do
             # exit 1
             continue
         else # make txt file
-            python make_pred_txt.py $experiment_name $version
+            python utils/make_pred_txt.py $experiment_name $version
         fi
     fi
 
@@ -122,7 +122,7 @@ do
             # exit 1
             continue
         else # make txt file
-            python make_pred_txt.py $experiment_name $version
+            python utils/make_pred_txt.py $experiment_name $version
         fi
     fi
 
