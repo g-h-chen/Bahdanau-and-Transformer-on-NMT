@@ -180,5 +180,5 @@ if __name__ == '__main__':
     import sys
     main()
 '''
-TOKENIZERS_PARALLELISM=true python train_bahdanau.py --name dim --version 3 --hidden_size 1024
+TOKENIZERS_PARALLELISM=true python train_bahdanau.py --name debug --version debug --n_enc 2 --n_dec 2 
 '''
