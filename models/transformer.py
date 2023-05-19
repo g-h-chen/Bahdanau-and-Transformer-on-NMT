@@ -23,7 +23,7 @@ from torch.nn import (TransformerEncoder, TransformerDecoder,
                       TransformerEncoderLayer, TransformerDecoderLayer)
 
 import types
-from models.overridden_classes_and_methods import (
+from models.transformer_overridden_classes_and_methods import (
     MultiheadAttention,
     overidden_decoder_forward,
     overridden_decoder_layer_forward,
