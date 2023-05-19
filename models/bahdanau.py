@@ -6,12 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from torch.nn.init import kaiming_normal, orthogonal_
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-
-
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
-from tqdm import trange
 
 
 from transformers import AutoTokenizer
@@ -46,22 +40,29 @@ class EncoderRNN(nn.Module):
     def forward(self, input):
         embedded = self.embedding(input)
         output, hidden = self.gru(embedded)
-        return output, hidden
+        return output, hidden # (bs, seqlen, dim), (D*n_layers, bs, dim)
 
 
 
 class BahdanauAttention(nn.Module):
-    def __init__(self, hidden_size):
+    def __init__(self, hidden_size, bidirectional=False):
         super(BahdanauAttention, self).__init__()
-        self.W1 = nn.Linear(hidden_size, hidden_size)
-        self.W2 = nn.Linear(hidden_size, hidden_size)
+        self.W1 = nn.Linear(hidden_size + bidirectional * hidden_size, hidden_size)
+        self.W2 = nn.Linear(hidden_size + bidirectional * hidden_size, hidden_size)
         self.V = nn.Linear(hidden_size, 1)
         # self.W3 = nn.Linear(hidden_size, 1)
 
     def forward(self, query, values, mask):
+        '''
+        query: decoder's previous hidden state (bs, 1=n_layers, dim)
+        values: encoder outputs (bs, seqlen, dim)
+        mask: input mask (bs, seqlen)
+        '''
         # Additive attention
         scores = self.V(torch.tanh(self.W1(query) + self.W2(values)))
-        scores = scores.squeeze(2).unsqueeze(1) # [B, M, 1] -> [B, 1, M]
+        # pdb.set_trace()
+        scores = scores.squeeze(2).unsqueeze(1) # bs, seqlen, 1 -> bs, 1 seqlen
+        # pdb.set_trace()
 
         # Dot-Product Attention: score(s_t, h_i) = s_t^T h_i
         # Query [B, 1, D] * Values [B, D, M] -> Scores [B, 1, M]
@@ -72,6 +73,7 @@ class BahdanauAttention(nn.Module):
 
         # Mask out invalid positions.
         scores.data.masked_fill_(mask.unsqueeze(1) == 0, -float('inf'))
+        # pdb.set_trace()
 
         # Attention weights
         alphas = F.softmax(scores, dim=-1)
@@ -87,9 +89,9 @@ class AttnDecoder(nn.Module):
     def __init__(self, hidden_size, output_vocab_size, num_layers, dropout, bidirectional, bos_token_id):
         super(AttnDecoder, self).__init__()
         self.embedding = nn.Embedding(output_vocab_size, hidden_size)
-        self.attention = BahdanauAttention(hidden_size)
+        self.attention = BahdanauAttention(hidden_size, bidirectional)
         self.gru = nn.GRU(
-            hidden_size*2, 
+            hidden_size*2 + hidden_size*bidirectional, 
             hidden_size, 
             num_layers=num_layers, 
             batch_first=True,
@@ -97,7 +99,8 @@ class AttnDecoder(nn.Module):
             bidirectional=bidirectional,
         )
         self.bos_token_id = bos_token_id
-        self.out = nn.Linear(hidden_size, output_vocab_size)
+        self.out = nn.Linear(hidden_size + hidden_size*bidirectional, output_vocab_size)
+        self.bidirectional = bidirectional
 
 
     def forward(self, encoder_outputs, encoder_hidden, input_mask,
@@ -131,9 +134,18 @@ class AttnDecoder(nn.Module):
 
 
     def forward_step(self, input, hidden, encoder_outputs, input_mask):
+        '''
+        input: decoder's input at current step (bs, 1, dim)
+        hidden: decoder's previous hidden state (n_layers, bs, dim)
+        encoder_outputs: (bs, seqlen, dim)
+        input_mask: (bs, seqlen)
+        '''
         # encoder_outputs: [B, Seq, D]
-        # query = hidden[[-1], :, :].permute(1, 0, 2) # [1, B, D] --> [B, 1, D]
-        query = hidden.permute(1, 0, 2) # [1, B, D] --> [B, 1, D]
+        if self.bidirectional:
+            query = torch.cat([hidden[[-2], :, :], hidden[[-1], :, :]], dim=-1).permute(1, 0, 2) # [1, B, D*2] --> [B, 1, D*2]
+        else:
+            query = hidden[[-1], :, :].permute(1, 0, 2) # [1, B, D] --> [B, 1, D]
+        # query = hidden.permute(1, 0, 2) # [1, B, D] --> [B, 1, D]
         context, attn_weights = self.attention(query, encoder_outputs, input_mask)
         embedded = self.embedding(input)
         attn = torch.cat((embedded, context), dim=2)
@@ -177,8 +189,6 @@ class EncoderDecoder(pl.LightningModule):
             # teacher_forcing_p=teacher_forcing_p,
         )
 
-        
-
 
         self.bidirectional = bidirectional
         self.maxlen = maxlen
@@ -187,19 +197,21 @@ class EncoderDecoder(pl.LightningModule):
         self.criterion = nn.NLLLoss(ignore_index=self.tgt_tokenizer.pad_token_id)
 
 
-
     def forward(self, inputs, input_mask, targets=None, length=None):
         #  bs, seqlen (long)
 
-        encoder_outputs, encoder_hidden = self.encoder(inputs)
+        encoder_outputs, encoder_hidden = self.encoder(inputs) # (bs, seqlen, dim), (n_layers, bs, dim)
+        # pdb.set_trace()
         decoder_outputs, decoder_hidden = self.decoder(
             encoder_outputs, encoder_hidden, input_mask, targets, length=length)
         return decoder_outputs, decoder_hidden
     
+
     def create_mask(self, input_tensor, pad_token_id):
         # bs seqlen
         # if pad token, then 0
         return input_tensor != pad_token_id
+
 
     def shared_step(self, batch, batch_idx):
         import pdb
@@ -213,11 +225,44 @@ class EncoderDecoder(pl.LightningModule):
         target_tensor = tgt.to(self.device)
         input_mask = self.create_mask(input_tensor, pad_token_id=self.src_tokenizer.pad_token_id)
 
-
         return input_tensor, input_mask, target_tensor
     
 
+    def training_step(self, batch, batch_idx):
+        input_tensor, input_mask, target_tensor = self.shared_step(batch, batch_idx)
+        decoder_outputs, decoder_hidden = self.forward(input_tensor, input_mask, target_tensor)
 
+        loss = self.criterion(
+        decoder_outputs.view(-1, decoder_outputs.size(-1)), # [B, Seq, OutVoc] -> [B*Seq, OutVoc]
+        target_tensor.view(-1) # [B, Seq] -> [B*Seq]
+        )
+
+        self.log("train/loss", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
+        self.log('tf', self.decoder.teacher_forcing_p, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
+        lr = None
+        if self.lr_schedulers():
+            lr = self.lr_schedulers().get_last_lr()[0]
+            # self.log('lr', lr, prog_bar=False, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
+        if self.global_step % self.trainer.print_every == 0 and self.global_rank == 0:
+            if lr:
+                logging.info(f'step: {self.global_step}, train_loss: {loss.item():.4f}, tf: {self.decoder.teacher_forcing_p:.2f}, lr: {lr:e} @ {datetime.now()}')
+            else:
+                logging.info(f'step: {self.global_step}, train_loss: {loss.item():.4f}, tf: {self.decoder.teacher_forcing_p:.2f} @ {datetime.now()}')
+
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        input_tensor, input_mask, target_tensor = self.shared_step(batch, batch_idx)
+        decoder_outputs, decoder_hidden = self.forward(input_tensor, input_mask, length=target_tensor.shape[1])
+        loss = self.criterion(
+            decoder_outputs.view(-1, decoder_outputs.size(-1)), # [B, Seq, OutVoc] -> [B*Seq, OutVoc]
+            target_tensor.view(-1) # [B, Seq] -> [B*Seq]
+        )
+
+        self.log("val/loss", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
+        if batch_idx % self.trainer.print_every == 0 and self.global_rank == 0:
+            logging.info(f'\tval_loss: {loss.item():.4f} @ {datetime.now()}')
+        return loss
 
     @torch.no_grad()
     def generate(self, src, do_sample=True, temperature=1.0, topk=None):
@@ -249,41 +294,7 @@ class EncoderDecoder(pl.LightningModule):
         batch_outputs = self.src_tokenizer.batch_decode(decoded_ids, self.tgt_vocab)
         return batch_outputs
 
-    def training_step(self, batch, batch_idx):
-        input_tensor, input_mask, target_tensor = self.shared_step(batch, batch_idx)
-        decoder_outputs, decoder_hidden = self.forward(input_tensor, input_mask, target_tensor)
-
-        loss = self.criterion(
-        decoder_outputs.view(-1, decoder_outputs.size(-1)), # [B, Seq, OutVoc] -> [B*Seq, OutVoc]
-        target_tensor.view(-1) # [B, Seq] -> [B*Seq]
-        )
-
-        self.log("train/loss", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
-        self.log('tf', self.decoder.teacher_forcing_p, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
-        lr = None
-        if self.lr_schedulers():
-            lr = self.lr_schedulers().get_last_lr()[0]
-            self.log('lr', lr, prog_bar=False, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
-        if self.global_step % self.trainer.print_every == 0 and self.global_rank == 0:
-            if lr:
-                logging.info(f'step: {self.global_step}, train_loss: {loss.item():.4f}, tf: {self.decoder.teacher_forcing_p:.2f}, lr: {lr:e} @ {datetime.now()}')
-            else:
-                logging.info(f'step: {self.global_step}, train_loss: {loss.item():.4f}, tf: {self.decoder.teacher_forcing_p:.2f} @ {datetime.now()}')
-
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        input_tensor, input_mask, target_tensor = self.shared_step(batch, batch_idx)
-        decoder_outputs, decoder_hidden = self.forward(input_tensor, input_mask, length=target_tensor.shape[1])
-        loss = self.criterion(
-            decoder_outputs.view(-1, decoder_outputs.size(-1)), # [B, Seq, OutVoc] -> [B*Seq, OutVoc]
-            target_tensor.view(-1) # [B, Seq] -> [B*Seq]
-        )
-
-        self.log("val/loss", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True, batch_size=self.batch_size)
-        if batch_idx % self.trainer.print_every == 0 and self.global_rank == 0:
-            logging.info(f'\tval_loss: {loss.item():.4f} @ {datetime.now()}')
-        return loss
+    
     
     
 
@@ -314,6 +325,7 @@ class EncoderDecoder(pl.LightningModule):
 
 
 
+# in case they will be used in the future, I keep them here. 
 from torch.optim.lr_scheduler import _LRScheduler
 
 class MyScheduler(_LRScheduler):
