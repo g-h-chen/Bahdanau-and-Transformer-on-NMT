@@ -30,6 +30,7 @@ def get_args():
     parser.add_argument('--enable_progress_bar', action='store_true', default=None)
     parser.add_argument('--warmup_steps', type=int, default=None)
     parser.add_argument('--val_check_interval', type=int, default=None)
+    parser.add_argument('--norm_first',  action='store_true')
     parser.add_argument('--do_not_override',  action='store_true')
     # parser.add_argument('--')
     args = parser.parse_args()
@@ -61,6 +62,8 @@ def parse_args(config, arg):
         config.seq2seqtransformer.num_decoder_layers = arg.n_dec
     if arg.hidden_size is not None:
         config.seq2seqtransformer.hidden_size = arg.hidden_size
+    if arg.norm_first:
+        config.seq2seqtransformer.norm_first = arg.norm_first
     if arg.do_not_override:
         config.seq2seqtransformer.do_not_override = arg.do_not_override
 

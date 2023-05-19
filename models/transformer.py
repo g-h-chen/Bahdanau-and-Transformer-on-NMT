@@ -50,7 +50,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 class Seq2SeqTransformer(pl.LightningModule):
     def __init__(self, hyperparams, num_encoder_layers: int, num_decoder_layers: int,
-                 maxlen, emb_size: int, n_head: int, batch_first=True,
+                 maxlen, emb_size: int, n_head: int, batch_first=True, norm_first=True,
                  dim_feedforward:int = 512, weight_decay=4.5e-4, learning_rate=1e-4, dropout:float = 0.1,
                  src_tokenizer_name=None, tgt_tokenizer_name=None, do_not_override=False):
         super(Seq2SeqTransformer, self).__init__()
@@ -71,7 +71,7 @@ class Seq2SeqTransformer(pl.LightningModule):
             dim_feedforward=dim_feedforward,
             dropout=dropout,
             batch_first=batch_first,
-            norm_first=True
+            norm_first=norm_first,
         )
         self.do_not_override = do_not_override
         if not do_not_override:

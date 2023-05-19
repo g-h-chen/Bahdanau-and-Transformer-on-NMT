@@ -24,6 +24,7 @@ seq2seqtransformer:
   maxlen: 256
   emb_size: 768 
   n_head: 8
+  norm_first: False
   learning_rate: 3.e-3
   dropout: .1
   weight_decay: 0.
