@@ -54,14 +54,14 @@ class BahdanauAttention(nn.Module):
 
     def forward(self, query, values, mask):
         '''
-        query: decoder's previous hidden state (bs, 1=n_layers, dim)
+        query: decoder's previous hidden state (bs, 1=the last layer, dim)
         values: encoder outputs (bs, seqlen, dim)
         mask: input mask (bs, seqlen)
         '''
         # Additive attention
         scores = self.V(torch.tanh(self.W1(query) + self.W2(values)))
         # pdb.set_trace()
-        scores = scores.squeeze(2).unsqueeze(1) # bs, seqlen, 1 -> bs, 1 seqlen
+        scores = scores.squeeze(2).unsqueeze(1) # bs, seqlen, 1 -> bs, 1, seqlen
         # pdb.set_trace()
 
         # Dot-Product Attention: score(s_t, h_i) = s_t^T h_i
