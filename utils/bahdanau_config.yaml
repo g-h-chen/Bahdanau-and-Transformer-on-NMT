@@ -44,7 +44,7 @@ EncoderDecoder:
   tgt_tokenizer_name: 'bert-base-chinese'
 
 tf:
-  code: 0
+  code: 1 # defalut constant at 0.5
   message: None
 
 optimizer:
