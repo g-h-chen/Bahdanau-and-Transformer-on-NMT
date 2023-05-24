@@ -45,7 +45,7 @@ Here are our major findings:
 
 - LLMs (Phoenix and Chimera) (sec 7.2)
 	- Phoenix outperforms Chimera. No surprise since the target language is Chinese, which is a non-Latin language, but Chimera is trained solely on Latin language while Phoenix is trained on both Latin and non-Latin language. 
-	- Instruction tuning is critical. All instrution-tuned models outperform their counterparts.
+	- Instruction tuning is crucial. All instrution-tuned models outperform their counterparts.
 
 
 
