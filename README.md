@@ -21,9 +21,11 @@ For both models,
 * support training on multiple GPUs via `pytorch_lightning`
 * support fp16 training via `pytorch_lightning`
  
-All codes are written by the owner of this repo. Reach me via [my email](mailto:guimingchen@link.cuhk.edu.cn) should you have any suggestion or questions.
+All codes are integrated/written by the owner of this repo. Reach me via [my email](mailto:guimingchen@link.cuhk.edu.cn) should you have any suggestion or questions.
 
 Please also check out [LLMZoo](https://github.com/FreedomIntelligence/LLMZoo/tree/main) and play around with Phoenix and Chimera!
+
+Codes for evaluation are taken from [here](https://github.com/mjpost/sacrebleu).
 
 ### Experiments
 We completed a report aiming to compare the ability of three (types of) attention-based models:
@@ -45,6 +47,8 @@ Here are our major findings:
 	- Phoenix outperforms Chimera. No surprise since the target language is Chinese, which is a non-Latin language, but Chimera is trained solely on Latin language while Phoenix is trained on both Latin and non-Latin language. 
 	- Instruction tuning is critical. All instrution-tuned models outperform their counterparts.
 
+
+
 ## Steps to run
 
 1. Install packages:
@@ -52,13 +56,13 @@ Here are our major findings:
     pip install -r requirements.txt
     ```
 
-
 2. Modify the keys in the original .json file and build vocab file from training data.
     ```bash
-    python data/process.py
-    python data/build_vocab.py
+    python data/process.py		# does nothing but rename the keys in the json files
+    python data/build_vocab.py		# builds vocab files that can be reused
+    python data/make_ans_txt.py		# extracts the target language of validation dataset and stores it in the format that is required by the evaluation part.
     ```
-    For Chinese, we split each character as a token. For English, we use `bert-base-uncased` tokenizer, but only words that appear at least twice will be added to the vocab file. 
+    For Chinese (target), we split each character as a token. For English (source), we use `bert-base-uncased` tokenizer, but only words that appear at least twice will be added to the vocab file. 
 
 
 3. Experiment: Bahdanau RNN
@@ -81,6 +85,5 @@ Here are our major findings:
 
 5. Evaluation
     ```bash
-    python data/make_ans_txt.py
     bash evaluate.sh
     ```
