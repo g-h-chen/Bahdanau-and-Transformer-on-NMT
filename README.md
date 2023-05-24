@@ -20,7 +20,7 @@ For both models,
 * support training on multiple GPUs via `pytorch_lightning`
 * support fp16 training via `pytorch_lightning`
  
-All codes are written by the owner of this repo. Reach me via [my email](guimingchen@link.cuhk.edu.cn) should you have any suggestion or questions.
+All codes are written by the owner of this repo. Reach me via [my email](mailto:guimingchen@link.cuhk.edu.cn) should you have any suggestion or questions.
 
 
 ## Steps to run
