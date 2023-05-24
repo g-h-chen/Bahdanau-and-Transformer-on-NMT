@@ -51,16 +51,17 @@ Here are our major findings:
 
 ## Steps to run
 
-1. Install packages:
+1. Install packages
     ```bash
     pip install -r requirements.txt
     ```
 
-2. Modify the keys in the original .json file and build vocab file from training data.
+2. Prepare training and validation data
     ```bash
-    python data/process.py		# does nothing but rename the keys in the json files
-    python data/build_vocab.py		# builds vocab files that can be reused
-    python data/make_ans_txt.py		# extracts the target language of validation dataset and stores it in the format that is required by the evaluation part.
+    python utils/combine_parts.py   # combine training file parts
+    python utils/process.py		    # does nothing but rename the keys in the json files
+    python utils/build_vocab.py		# builds vocab files that can be reused
+    python utils/make_ans_txt.py	# extracts the target language of validation dataset and stores it in the format that is required by the evaluation part.
     ```
     For Chinese (target), we split each character as a token. For English (source), we use `bert-base-uncased` tokenizer, but only words that appear at least twice will be added to the vocab file. 
 
